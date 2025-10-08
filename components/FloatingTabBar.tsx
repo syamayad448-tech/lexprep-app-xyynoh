@@ -10,7 +10,7 @@ import Animated, {
   withSpring,
   interpolate,
 } from 'react-native-reanimated';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   View,
   Text,
@@ -45,7 +45,29 @@ export default function FloatingTabBar({
   const pathname = usePathname();
   const theme = useTheme();
   
-  const animatedValues = tabs.map(() => useSharedValue(0));
+  // Create shared values for each tab at the top level
+  const animatedValues = useMemo(() => 
+    tabs.map(() => useSharedValue(0)), 
+    [tabs.length]
+  );
+
+  // Create animated styles for each tab at the top level
+  const animatedStyles = useMemo(() => 
+    animatedValues.map((animatedValue) => 
+      useAnimatedStyle(() => {
+        const scale = interpolate(
+          animatedValue.value,
+          [0, 1],
+          [1, 0.9]
+        );
+        
+        return {
+          transform: [{ scale }],
+        };
+      })
+    ), 
+    [animatedValues]
+  );
 
   const handleTabPress = (route: string, index: number) => {
     console.log('Tab pressed:', route);
@@ -83,21 +105,9 @@ export default function FloatingTabBar({
         >
           {tabs.map((tab, index) => {
             const active = isActive(tab.route);
-            
-            const animatedStyle = useAnimatedStyle(() => {
-              const scale = interpolate(
-                animatedValues[index].value,
-                [0, 1],
-                [1, 0.9]
-              );
-              
-              return {
-                transform: [{ scale }],
-              };
-            });
 
             return (
-              <Animated.View key={tab.name} style={[styles.tabItem, animatedStyle]}>
+              <Animated.View key={tab.name} style={[styles.tabItem, animatedStyles[index]]}>
                 <TouchableOpacity
                   style={[
                     styles.tabButton,
