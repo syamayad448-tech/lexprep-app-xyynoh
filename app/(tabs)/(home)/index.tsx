@@ -1,78 +1,126 @@
-import React from "react";
-import { Stack, Link } from "expo-router";
-import { FlatList, Pressable, StyleSheet, View, Text, Alert, Platform } from "react-native";
-import { IconSymbol } from "@/components/IconSymbol";
-import { GlassView } from "expo-glass-effect";
-import { useTheme } from "@react-navigation/native";
 
-const ICON_COLOR = "#007AFF";
+import React, { useState } from "react";
+import { Stack } from "expo-router";
+import { 
+  ScrollView, 
+  View, 
+  Text, 
+  StyleSheet, 
+  Platform,
+  Pressable,
+  Alert
+} from "react-native";
+import { IconSymbol } from "@/components/IconSymbol";
+import { SafeAreaView } from "react-native-safe-area-context";
+import { colors, typography, spacing, borderRadius, shadows, commonStyles } from "@/styles/commonStyles";
 
 export default function HomeScreen() {
-  const theme = useTheme();
-  const modalDemos = [
+  const [userName] = useState("Marie"); // This would come from user profile
+  const [faculty] = useState("Université Paris 1 Panthéon-Sorbonne");
+  const [level] = useState("L1 Droit");
+
+  // Mock data for upcoming deadlines
+  const upcomingDeadlines = [
     {
-      title: "Standard Modal",
-      description: "Full screen modal presentation",
-      route: "/modal",
-      color: "#007AFF",
+      id: 1,
+      title: "Examen Droit Civil",
+      date: "15 Mars 2024",
+      type: "exam",
+      priority: "high"
     },
     {
-      title: "Form Sheet",
-      description: "Bottom sheet with detents and grabber",
-      route: "/formsheet",
-      color: "#34C759",
+      id: 2,
+      title: "TD Droit Constitutionnel",
+      date: "18 Mars 2024",
+      type: "assignment",
+      priority: "medium"
     },
     {
-      title: "Transparent Modal",
-      description: "Overlay without obscuring background",
-      route: "/transparent-modal",
-      color: "#FF9500",
+      id: 3,
+      title: "Dissertation Histoire du Droit",
+      date: "22 Mars 2024",
+      type: "assignment",
+      priority: "low"
     }
   ];
 
-  const renderModalDemo = ({ item }: { item: (typeof modalDemos)[0] }) => (
-    <GlassView style={[
-      styles.demoCard,
-      Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.1)' : 'rgba(0,0,0,0.05)' }
-    ]} glassEffectStyle="regular">
-      <View style={[styles.demoIcon, { backgroundColor: item.color }]}>
-        <IconSymbol name="square.grid.3x3" color="white" size={24} />
-      </View>
-      <View style={styles.demoContent}>
-        <Text style={[styles.demoTitle, { color: theme.colors.text }]}>{item.title}</Text>
-        <Text style={[styles.demoDescription, { color: theme.dark ? '#98989D' : '#666' }]}>{item.description}</Text>
-      </View>
-      <Link href={item.route as any} asChild>
-        <Pressable>
-          <GlassView style={[
-            styles.tryButton,
-            Platform.OS !== 'ios' && { backgroundColor: theme.dark ? 'rgba(255,255,255,0.15)' : 'rgba(0,0,0,0.08)' }
-          ]} glassEffectStyle="clear">
-            <Text style={[styles.tryButtonText, { color: theme.colors.primary }]}>Try It</Text>
-          </GlassView>
-        </Pressable>
-      </Link>
-    </GlassView>
-  );
+  // Mock data for today's schedule
+  const todaySchedule = [
+    {
+      id: 1,
+      time: "09:00",
+      subject: "Droit Civil",
+      type: "Cours Magistral",
+      room: "Amphi A"
+    },
+    {
+      id: 2,
+      time: "14:00",
+      subject: "Droit Constitutionnel",
+      type: "TD",
+      room: "Salle 205"
+    }
+  ];
+
+  const quickActions = [
+    {
+      id: 1,
+      title: "Flashcards",
+      subtitle: "Réviser rapidement",
+      icon: "rectangle.stack.fill",
+      color: colors.primary,
+      action: () => Alert.alert("Navigation", "Redirection vers les flashcards")
+    },
+    {
+      id: 2,
+      title: "Quiz",
+      subtitle: "Tester ses connaissances",
+      icon: "questionmark.circle.fill",
+      color: colors.accent,
+      action: () => Alert.alert("Navigation", "Redirection vers les quiz")
+    },
+    {
+      id: 3,
+      title: "Forum",
+      subtitle: "Poser une question",
+      icon: "bubble.left.and.bubble.right.fill",
+      color: colors.secondary,
+      action: () => Alert.alert("Navigation", "Redirection vers le forum")
+    },
+    {
+      id: 4,
+      title: "Actualités",
+      subtitle: "Dernières nouvelles",
+      icon: "newspaper.fill",
+      color: colors.highlight,
+      action: () => Alert.alert("Navigation", "Redirection vers les actualités")
+    }
+  ];
+
+  const getPriorityColor = (priority: string) => {
+    switch (priority) {
+      case 'high': return colors.error;
+      case 'medium': return colors.warning;
+      case 'low': return colors.success;
+      default: return colors.textSecondary;
+    }
+  };
 
   const renderHeaderRight = () => (
     <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
+      onPress={() => Alert.alert("Notifications", "Aucune nouvelle notification")}
+      style={styles.headerButton}
     >
-      <IconSymbol name="plus" color={theme.colors.primary} />
+      <IconSymbol name="bell.fill" color={colors.primary} size={24} />
     </Pressable>
   );
 
   const renderHeaderLeft = () => (
     <Pressable
-      onPress={() => Alert.alert("Not Implemented", "This feature is not implemented yet")}
-      style={styles.headerButtonContainer}
+      onPress={() => Alert.alert("Menu", "Ouverture du menu latéral")}
+      style={styles.headerButton}
     >
-      <IconSymbol
-        name="gear"
-        color={theme.colors.primary}
-      />
+      <IconSymbol name="line.horizontal.3" color={colors.primary} size={24} />
     </Pressable>
   );
 
@@ -81,81 +129,233 @@ export default function HomeScreen() {
       {Platform.OS === 'ios' && (
         <Stack.Screen
           options={{
-            title: "Building the app...",
+            title: "Accueil",
             headerRight: renderHeaderRight,
             headerLeft: renderHeaderLeft,
           }}
         />
       )}
-      <View style={[styles.container, { backgroundColor: theme.colors.background }]}>
-        <FlatList
-          data={modalDemos}
-          renderItem={renderModalDemo}
-          keyExtractor={(item) => item.route}
+      <SafeAreaView style={commonStyles.safeArea}>
+        <ScrollView 
+          style={commonStyles.container}
           contentContainerStyle={[
-            styles.listContainer,
-            Platform.OS !== 'ios' && styles.listContainerWithTabBar
+            styles.scrollContent,
+            Platform.OS !== 'ios' && styles.scrollContentWithTabBar
           ]}
-          contentInsetAdjustmentBehavior="automatic"
           showsVerticalScrollIndicator={false}
-        />
-      </View>
+        >
+          {/* Welcome Section */}
+          <View style={styles.welcomeSection}>
+            <Text style={[typography.h2, styles.welcomeText]}>
+              Bonjour {userName} 👋
+            </Text>
+            <Text style={[typography.bodySecondary, styles.facultyText]}>
+              {faculty} • {level}
+            </Text>
+          </View>
+
+          {/* Quick Actions */}
+          <View style={styles.section}>
+            <Text style={[typography.h3, styles.sectionTitle]}>Actions rapides</Text>
+            <View style={styles.quickActionsGrid}>
+              {quickActions.map((action) => (
+                <Pressable
+                  key={action.id}
+                  style={[styles.quickActionCard, { borderLeftColor: action.color }]}
+                  onPress={action.action}
+                >
+                  <View style={[styles.quickActionIcon, { backgroundColor: action.color }]}>
+                    <IconSymbol name={action.icon as any} color={colors.card} size={20} />
+                  </View>
+                  <View style={styles.quickActionContent}>
+                    <Text style={[typography.body, styles.quickActionTitle]}>
+                      {action.title}
+                    </Text>
+                    <Text style={typography.bodySecondary}>
+                      {action.subtitle}
+                    </Text>
+                  </View>
+                </Pressable>
+              ))}
+            </View>
+          </View>
+
+          {/* Today's Schedule */}
+          <View style={styles.section}>
+            <Text style={[typography.h3, styles.sectionTitle]}>Emploi du temps d&apos;aujourd&apos;hui</Text>
+            <View style={commonStyles.card}>
+              {todaySchedule.map((item, index) => (
+                <View key={item.id}>
+                  <View style={styles.scheduleItem}>
+                    <View style={styles.scheduleTime}>
+                      <Text style={[typography.body, { color: colors.primary }]}>
+                        {item.time}
+                      </Text>
+                    </View>
+                    <View style={styles.scheduleContent}>
+                      <Text style={typography.body}>{item.subject}</Text>
+                      <Text style={typography.bodySecondary}>
+                        {item.type} • {item.room}
+                      </Text>
+                    </View>
+                  </View>
+                  {index < todaySchedule.length - 1 && <View style={commonStyles.divider} />}
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Upcoming Deadlines */}
+          <View style={styles.section}>
+            <Text style={[typography.h3, styles.sectionTitle]}>Prochaines échéances</Text>
+            <View style={commonStyles.card}>
+              {upcomingDeadlines.map((deadline, index) => (
+                <View key={deadline.id}>
+                  <View style={styles.deadlineItem}>
+                    <View style={[
+                      styles.priorityIndicator, 
+                      { backgroundColor: getPriorityColor(deadline.priority) }
+                    ]} />
+                    <View style={styles.deadlineContent}>
+                      <Text style={typography.body}>{deadline.title}</Text>
+                      <Text style={typography.bodySecondary}>{deadline.date}</Text>
+                    </View>
+                    <IconSymbol 
+                      name={deadline.type === 'exam' ? 'doc.text.fill' : 'pencil.circle.fill'} 
+                      color={colors.textSecondary} 
+                      size={20} 
+                    />
+                  </View>
+                  {index < upcomingDeadlines.length - 1 && <View style={commonStyles.divider} />}
+                </View>
+              ))}
+            </View>
+          </View>
+
+          {/* Study Progress */}
+          <View style={styles.section}>
+            <Text style={[typography.h3, styles.sectionTitle]}>Progression cette semaine</Text>
+            <View style={commonStyles.card}>
+              <View style={styles.progressItem}>
+                <Text style={typography.body}>Flashcards révisées</Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: '75%', backgroundColor: colors.primary }]} />
+                </View>
+                <Text style={typography.bodySecondary}>45/60</Text>
+              </View>
+              <View style={commonStyles.divider} />
+              <View style={styles.progressItem}>
+                <Text style={typography.body}>Quiz complétés</Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: '60%', backgroundColor: colors.accent }]} />
+                </View>
+                <Text style={typography.bodySecondary}>6/10</Text>
+              </View>
+              <View style={commonStyles.divider} />
+              <View style={styles.progressItem}>
+                <Text style={typography.body}>Heures d&apos;étude</Text>
+                <View style={styles.progressBar}>
+                  <View style={[styles.progressFill, { width: '85%', backgroundColor: colors.success }]} />
+                </View>
+                <Text style={typography.bodySecondary}>17/20h</Text>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </SafeAreaView>
     </>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    // backgroundColor handled dynamically
+  scrollContent: {
+    paddingHorizontal: spacing.md,
+    paddingBottom: spacing.xl,
   },
-  listContainer: {
-    paddingVertical: 16,
-    paddingHorizontal: 16,
+  scrollContentWithTabBar: {
+    paddingBottom: 120, // Extra padding for floating tab bar
   },
-  listContainerWithTabBar: {
-    paddingBottom: 100, // Extra padding for floating tab bar
+  welcomeSection: {
+    paddingVertical: spacing.lg,
   },
-  demoCard: {
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
+  welcomeText: {
+    marginBottom: spacing.xs,
+  },
+  facultyText: {
+    marginBottom: spacing.sm,
+  },
+  section: {
+    marginBottom: spacing.lg,
+  },
+  sectionTitle: {
+    marginBottom: spacing.md,
+  },
+  quickActionsGrid: {
+    gap: spacing.sm,
+  },
+  quickActionCard: {
+    ...commonStyles.card,
     flexDirection: 'row',
     alignItems: 'center',
+    borderLeftWidth: 4,
+    marginVertical: spacing.xs,
   },
-  demoIcon: {
-    width: 48,
-    height: 48,
-    borderRadius: 24,
-    justifyContent: 'center',
+  quickActionIcon: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
     alignItems: 'center',
-    marginRight: 16,
+    justifyContent: 'center',
+    marginRight: spacing.md,
   },
-  demoContent: {
+  quickActionContent: {
     flex: 1,
   },
-  demoTitle: {
-    fontSize: 18,
+  quickActionTitle: {
     fontWeight: '600',
-    marginBottom: 4,
-    // color handled dynamically
+    marginBottom: spacing.xs,
   },
-  demoDescription: {
-    fontSize: 14,
-    lineHeight: 18,
-    // color handled dynamically
+  scheduleItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
   },
-  headerButtonContainer: {
-    padding: 6,
+  scheduleTime: {
+    width: 60,
+    marginRight: spacing.md,
   },
-  tryButton: {
-    paddingHorizontal: 16,
-    paddingVertical: 8,
-    borderRadius: 6,
+  scheduleContent: {
+    flex: 1,
   },
-  tryButtonText: {
-    fontSize: 14,
-    fontWeight: '600',
-    // color handled dynamically
+  deadlineItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: spacing.sm,
+  },
+  priorityIndicator: {
+    width: 4,
+    height: 40,
+    borderRadius: 2,
+    marginRight: spacing.md,
+  },
+  deadlineContent: {
+    flex: 1,
+  },
+  progressItem: {
+    paddingVertical: spacing.sm,
+  },
+  progressBar: {
+    height: 8,
+    backgroundColor: colors.border,
+    borderRadius: 4,
+    marginVertical: spacing.xs,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  headerButton: {
+    padding: spacing.sm,
   },
 });
